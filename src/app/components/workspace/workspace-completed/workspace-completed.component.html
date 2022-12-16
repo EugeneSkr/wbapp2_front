@@ -1,0 +1,62 @@
+<div class="container">
+     <!-- выбор периода -->
+    <div class="mb-4">
+        <form (ngSubmit)="selectPeriod()" novalidate>
+            <p class="text-muted my-1">Выбрать за период</p>
+            <input class="form-control w-auto d-inline-block" type="date" value="{{ supplyPageParams.startDate }}" name="startDate" [(ngModel)]="supplyPageParams.startDate" /> - 
+            <input class="form-control w-auto d-inline-block" type="date" value="{{ supplyPageParams.endDate }}" name="endDate" [(ngModel)]="supplyPageParams.endDate" />
+            <button type="submit" class="btn btn-outline-primary ms-2 align-top">Выбрать</button>
+            <button type="button" *ngIf="supplyPageParams.optionStr" class="btn btn-link ms-2 align-top" (click)="clearFilters()">Очистить фильтры</button>
+        </form>
+    </div>
+
+    <!-- поиск -->
+    <div class="my-3">
+        <input class="form-control w-25 d-inline-block"  [(ngModel)]="searchInput"  (ngModelChange)='searchInputChanged.next($event)' placeholder="Поиск" type="text" />
+        <img *ngIf="loadingService.isLoading$ | async" class="d-inline-block loader ms-2" src="{{ constants.SITE_NAME }}public/siteImages/spinner.gif"  />
+    </div>
+    
+    <h5 class="text-danger">{{ helpersService.customError$ | async }}</h5>
+
+    <!-- вывод строки с информацией о поиске -->
+    <div *ngIf="supplyPageParams.optionStr" class="mb-3">
+        <p>{{ supplyPageParams.optionStr }}</p>
+    </div>
+
+    <!-- номера страниц -->
+    <div class="mb-3" *ngIf="supplyPageParams.totalPages > 1 && supplyList.length > 50">
+        <a *ngFor="let in of helpersService.counter(supplyPageParams.totalPages); let i='index + 1';" [ngClass]="supplyPageParams.currentPage == i ? 'me-1 btn btn-primary btn-sm' : 'me-1 btn btn-outline-primary btn-sm'" (click)="changePage(i, false)" class="nowrap">{{ i }}</a>
+    </div>
+
+    <!-- таблица закрытых поставок -->
+    <table class="table table-hover table-sm mb-5">
+        <tbody>
+            <tr *ngFor = "let supply of supplyList" >
+                <td><a class="link-primary" title="Печать штрихкода идентификатора поставки" [href]="'/workspace/print?supplyId=' + supply.supplyId" target="_blank">{{ supply.supplyId }}</a></td>
+                <td>
+                    <p class="text-muted small my-0">Открыто</p>
+                    <p class="small my-0">{{ supply.openTime }}</p>
+                    <p class="small my-0">{{ supply.openUserFio }}</p>
+                </td>
+                <td>
+                    <p class="text-muted small my-0">Закрыто</p>
+                    <p class="small my-0">{{ supply.closeTime }}</p>
+                    <p class="small my-0">{{ supply.closeUserFio }}</p>
+                </td>
+                <td>
+                    <p class="text-muted small my-0">Количество заказов: <span class="text-normal fw-bold">{{ supply.ordersCount }}</span> </p>
+                </td>
+                <td>
+                    <a class="link-primary" [href]="'/workspace/print?pickListBySupplyId=' + supply.supplyId" target="_blank">Печать листа подбора</a>
+                </td>
+                <td>
+                    <a class="link-primary" [href]="'/workspace/print?stickersQRBySupplyId=' + supply.supplyId" target="_blank">Печать списка QR кодов</a>
+                </td>
+                <td>
+                    <a class="link-primary" [href]="'/workspace/print?stickersBySupplyId=' + supply.supplyId" target="_blank">Печать списка этикеток</a>
+                </td>
+                   
+            </tr>
+        </tbody>
+    </table>
+</div>

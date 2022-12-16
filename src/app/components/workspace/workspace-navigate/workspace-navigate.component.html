@@ -1,0 +1,16 @@
+<div class="noprint">
+    <div class="py-2 px-2 navi">
+        <div class="container">
+            <div class="float-end"><span class="me-2">{{ userService.currentUser.fio }}</span><a class="btn btn-link" (click)="logout()">Выйти</a></div>
+            <div *ngIf="userService.currentUser.role != 'norole'">
+                <span class="me-2" *ngFor="let item of menuItems">
+                    <a class="btn btn-outline-primary" routerLink="{{item.url}}" routerLinkActive="btnActive" [routerLinkActiveOptions]="{exact: item.exact}" *ngIf="userService.currentUser.role == item.role || item.role == 'all'">{{ item.title }}</a>
+                </span>
+            </div>
+            <div *ngIf="userService.currentUser.role == 'norole'">
+                <span>&nbsp;</span>
+            </div>
+
+        </div>
+    </div>
+</div>

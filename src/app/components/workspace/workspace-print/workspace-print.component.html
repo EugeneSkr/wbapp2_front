@@ -1,0 +1,63 @@
+<div class="container">
+    <h5 class="text-danger">{{ helpersService.customError$ | async }}</h5>
+
+    <div class="noprint">
+        <img *ngIf="loadingService.isLoading$  | async" class="d-inline-block loader ms-2" src="{{ constants.SITE_NAME }}public/siteImages/spinner.gif"  />
+    </div>
+
+    <!-- ШК поставки -->
+    <div class="my-3 text-center" *ngIf="supplyBarcode">
+        <svg width="400" height="300"  fill="none" xmlns="http://www.w3.org/2000/svg" [innerHTML]="supplyBarcode"></svg>
+        <div class="text-center"><h5>Поставка {{ supplyId }}</h5></div>
+    </div>
+
+    <!-- лист подбора  -->
+    <div *ngIf="pickListOrders.length > 1">
+        <h5 class="mt-3" *ngIf="pickListBySupplyId">Лист подбора по поставке <b>{{ pickListBySupplyId }}</b></h5>
+        <h5 class="mt-3" *ngIf="pickListId">Лист подбора</h5>
+        <p class="my-3">Дата: {{ pickListDate }} <span class="ms-5">Количество товара: {{ pickListCount }}</span></p>
+
+        <table class="table table-bordered table-sm mb-5">
+            <thead>
+                <tr>
+                    <td>№ задания</td>
+                    <td>Фото</td>
+                    <td>Бренд</td>
+                    <td>Название</td>
+                    <td>Размер</td>
+                    <td>Цвет</td>
+                    <td>Артикул поставщика</td>
+                    <td>Этикетка</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let order of pickListOrders">
+                    <td>{{ order.orderId }}</td>
+                    <td><span *ngIf="order.item.photo"><a [href]="constants.SITE_NAME + 'public/images/' + order.item.photo" target="_blank"><img [src]="constants.SITE_NAME + 'cache/40-60-100/public/images/' + order.item.photo" /></a></span></td>
+                    <td>{{ order.item.brand }}</td>
+                    <td [title]="order.item.title">{{ order.item.shortTitle }}</td>
+                    <td>{{ order.item.size }}</td>
+                    <td>{{ order.item.color }}</td>
+                    <td>{{ order.item.articul }}</td>
+                    <td><svg class="svgContainer" viewBox="0 0 400 450" xmlns="http://www.w3.org/2000/svg" [innerHTML]="order.sticker"></svg></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- информационные стикеры из pdf -->
+    <div *ngIf="stickers">
+        <ngx-extended-pdf-viewer
+            [src]="stickers"
+            [useBrowserLocale]="true">
+        </ngx-extended-pdf-viewer>
+    </div>
+
+    <!-- стикеры QR по поставке -->
+    <div *ngIf="stickersQR.length > 0">
+        <div *ngFor="let sticker of stickersQR">
+            <svg class="qrContainer" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" [innerHTML]="sticker.sticker"></svg>
+            <h1></h1>
+        </div>
+    </div>
+</div>

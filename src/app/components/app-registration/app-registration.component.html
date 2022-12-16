@@ -1,0 +1,50 @@
+<div class="container">
+    <h3 class="mb-3 text-primary">Wbapp</h3>
+    <h3 class="mb-3">Регистрация</h3>
+    <p>Все поля обязательны для заполнения</p>
+    <!-- форма регистрации -->
+    <form (ngSubmit)="checkRegistration()" #regForm="ngForm" novalidate>
+        <div class="text-danger"><p>{{ helpersService.customError$ | async }}&nbsp;</p></div> 
+        <div class="mb-3">
+            <label class="form-label">Электронная почта:</label>
+            <input type="email" class="form-control" autofocus  name="regEmail" id="regEmail" appEmailValidator #regEmail="ngModel" [(ngModel)]="regUser.email" required/>
+            <p class="text-danger" *ngIf="regEmail.errors?.['required'] && (regEmail.dirty || regEmail.touched)">Укажите адрес электронной почты</p>
+            <p class="text-danger" *ngIf="regEmail.errors?.['emailInvalid'] && (regEmail.dirty || regEmail.touched)">Укажите корректный адрес электронной почты</p>
+        </div>
+        <div class="form-row" ngModelGroup="passwords" #passwords="ngModelGroup" appCheckPassword>
+            <div class="mb-3">
+                <label class="form-label">Пароль (от 6 символов):</label>
+                <input type="password" class="form-control" name="regPassword" #regPassword="ngModel" [(ngModel)]="regUser.password" required minlength="6"/>
+                <p class="text-danger" *ngIf="regPassword.invalid && (regPassword.dirty || regPassword.touched)">Введите пароль (длина от 6 символов)</p>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Повторите пароль:</label>
+                <input type="password" class="form-control"   name="regPassword2" #regPassword2="ngModel" [(ngModel)]="regUser.password2" required />
+                <p class="text-danger" *ngIf="regPassword2.invalid && (regPassword2.dirty || regPassword2.touched)">Повторите пароль</p>
+                <p class="text-danger" *ngIf="passwords.errors?.['passwordMismatch'] && (regPassword2.dirty || regPassword2.touched)">Пароли не сходятся</p>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Фамилия:</label>
+            <input type="text" class="form-control" name="regLastName" #regLastName="ngModel" [(ngModel)]="regUser.lastName" required/>
+            <p class="text-danger" *ngIf="regLastName.invalid && (regLastName.dirty || regLastName.touched)">Укажите свою фамилию</p>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Имя:</label>
+            <input type="text" class="form-control"  name="regName" #regName="ngModel" [(ngModel)]="regUser.name" required/>
+            <p class="text-danger" *ngIf="regName.invalid && (regName.dirty || regName.touched)">Укажите своё имя</p>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Отчество:</label>
+            <input type="text" class="form-control" name="regSureName" #regSureName="ngModel" [(ngModel)]="regUser.sureName" required/>
+            <p class="text-danger" *ngIf="regSureName.invalid && (regSureName.dirty || regSureName.touched)">Укажите своё отчество</p>
+        </div>
+        <div class="mb-3 text-end">
+            <button type="submit" class="btn btn-primary" [disabled]="regForm.invalid">Зарегистрироваться</button>
+        </div>
+        <div class="mb-3 text-center">
+            <a href="/login" class="btn btn-link btn-sm">Войти</a>
+            <a href="/recovery" class="btn btn-link btn-sm">Забыли пароль?</a>
+        </div>
+    </form>
+</div>

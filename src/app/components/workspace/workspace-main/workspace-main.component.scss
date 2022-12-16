@@ -1,0 +1,62 @@
+.small{
+    font-size:12px;
+}
+
+.imgContainer{
+    position: relative;
+    display:inline-block;
+    width:auto;
+    height:100px;
+    margin:10px 20px 10px 0;
+}
+
+.imgItem{
+    height:100px;
+}
+
+.imgItemSm{
+    height: 50px;
+}
+
+
+.nowrap{
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.highlight{
+    background-color: yellow;
+}
+
+.checkbx{
+    margin: 0;
+}
+
+.selected{
+    background-color: bisque;
+}
+
+.checkContainer{
+    margin:20px 0 -20px 0;
+}
+
+.supplyContainer{
+    display: inline-block;
+    padding:7px 16px;
+    background-color:#ffe492;
+    border:1px solid #ffc107;
+    border-radius: 10px;
+}
+
+.mbfx{
+    margin-bottom: 60px;
+}
+
+
+.loader{
+    width:40px;
+}
+
+.activeBtn{
+    background-color: cornflowerblue;
+}

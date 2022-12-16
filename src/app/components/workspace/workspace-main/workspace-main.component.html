@@ -1,0 +1,135 @@
+<div class="container mt-3 text-danger" *ngIf="userService.currentUser.role == 'norole'">Вы не авторизованы. Обратитесь к администратору сайта для авторизации.</div>
+<div class="container mt-3" *ngIf="userService.currentUser.role != 'norole'">
+
+    <!-- зафиксированный блок отбора заказов по артикулу -->
+    <div class="fixed-bottom bg-light mbfx" *ngIf="selectByArticul">
+        <div class="container my-2">
+            <p class="mt-3"><button (click)="selectByArticulSearch()" class="btn btn-outline-success btn-sm ms-3">Отобрать по артикулу {{ selectByArticul }}</button></p>
+        </div>
+    </div>
+    <!-- зафиксированный блок с информацией о выделенных заказах -->
+    <div class="fixed-bottom bg-warning" *ngIf="selectedOrders.length">
+        <div class="container my-2">
+            <button (click)="clearSelection()" class="float-end btn btn-outline-dark btn-sm">Очистить выбор</button>
+            <p class="mt-3">Выделено элементов: <span class="fw-bold">{{ selectedOrders.length }}</span><button (click)="createPickList()" class="btn btn-danger btn-sm ms-3">Сформировать лист подбора</button><span class="text-danger ms-3 fs-5 fw-b" *ngIf="pickError">{{ pickError }}</span></p>
+        </div>
+    </div>
+
+    <!-- Создание поставки -->
+    <div class="my-3">
+        <button class="btn btn-warning" *ngIf="!currentSupllyId" (click)="createNewSupply()">Создать поставку</button>
+        <div *ngIf="currentSupllyId" class="supplyContainer d-inline-block">Идентификатор поставки: <a target="_blank" [href]="'/workspace/print?supplyId=' + currentSupllyId">{{ currentSupllyId }}</a></div>
+        <button *ngIf="currentSupllyId" (click)="closeSupply()" class="ms-2 btn btn-warning">Закрыть поставку</button>
+    </div>
+
+    <!-- Переключение просмотра между новыми заказами и заказами в поставке -->
+    <p><button (click)="changeView('new')" class="btn btn-outline-secondary me-2" [ngClass]="ordersPageParams.viewType == 'new' ? 'active' : ''">Заказы к сборке [{{ ordersPageParams.totalCount }}]</button> 
+        <button (click)="changeView('inSupply')" class="btn btn-outline-secondary" [ngClass]="ordersPageParams.viewType == 'inSupply' ? 'active' : ''">Собранные [{{ ordersPageParams.totalCountInSuplly }}]</button>
+        <button (click)="clearUnused()" class="btn btn-outline-secondary float-end">Обновить список заказов</button>
+    </p>
+    
+    <!-- поиск, индикация загрузки, страницы -->
+    <div class="my-3">
+        <input *ngIf="ordersPageParams.viewType == 'new'" class="form-control w-25 d-inline-block"  [(ngModel)]="searchInput"  (ngModelChange)='searchInputChanged.next($event)' placeholder="Поиск" type="text" />
+        <img *ngIf="loadingService.isLoading$  | async" class="d-inline-block loader ms-2" src="{{ constants.SITE_NAME }}public/siteImages/spinner.gif"  />
+    </div>
+    <div *ngIf="ordersPageParams.totalPages > 1">
+        <a *ngFor="let in of helpersService.counter(ordersPageParams.totalPages); let i='index + 1';" [ngClass]="ordersPageParams.currentPage == i ? 'me-1 btn btn-primary btn-sm' : 'me-1 btn btn-outline-primary btn-sm'" (click)="changePage(i, false)" class="nowrap">{{ i }}</a>
+    </div>
+
+    <h5 class="text-danger">{{ helpersService.customError$ | async }}</h5>
+
+    <!-- таблица новых заказов -->
+    <table *ngIf="ordersPageParams.viewType == 'new'" class="table table-hover table-sm mb-2">
+        <thead>
+            <tr class="text-start">
+                <th *ngFor="let field of tableFields" [width]="field.width + '%'">
+                    <a *ngIf="!field.title" title="Выделить все заказы на страницы/снять выделение со всех" class="nowrap text-decoration-none fw-normal" (click)="toggleSelect()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-square" viewBox="0 0 16 16">
+                            <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                            <path d="M8.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L2.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093L8.95 4.992a.252.252 0 0 1 .02-.022zm-.92 5.14.92.92a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 1 0-1.091-1.028L9.477 9.417l-.485-.486-.943 1.179z"/>
+                            </svg>
+                    </a>
+                    <a *ngIf="field.sort" (click)="changeSort(field.sort)" class="nowrap text-decoration-none fw-normal">{{ field.title }}
+                        <span *ngIf="field.active && field.order == 'ASC'">
+                            <!-- arrow-down -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-short" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M8 4a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293V4.5A.5.5 0 0 1 8 4z"/>
+                            </svg>
+                        </span>
+                        <!-- arrow-up -->
+                        <span *ngIf="field.active && field.order == 'DESC'">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-short" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M8 12a.5.5 0 0 0 .5-.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5a.5.5 0 0 0 .5.5z"/>
+                            </svg>
+                        </span>
+                    </a>
+                    <a class="text-decoration-none fw-normal" *ngIf="!field.sort">
+                        {{ field.title }}
+                    </a>
+
+                </th>                  
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let order of orders" role="button" id="row{{order.orderId}}" (click)="selectOrder(order.orderId)" [ngClass]="order.selected ? 'selected' : ''">
+                <th scope="row"><input type="checkbox" class="form-check-input" [checked]="order.selected" id="check{{order.orderId}}" /></th>
+                <td class="small" ><p appHighlight [searchInput]="searchInput" [content]="order.orderId.toString()">{{ order.orderId }}</p></td>
+                <td class="text-muted small" ><p appHighlight [searchInput]="searchInput" [content]="order.dateCreated">{{ order.dateCreated }}</p></td>
+                <td><img *ngIf="order.item.photo" [src]="constants.SITE_NAME + 'cache/38-50-100/public/images/' + order.item.photo" class="imgItemSm" /></td>
+                <td ><p appHighlight [searchInput]="searchInput" [content]="order.item.type">{{ order.item.type }}</p></td>
+                <td ><p appHighlight [searchInput]="searchInput" [content]="order.item.articul">{{ order.item.articul }}</p></td>
+                <td ><p appHighlight [searchInput]="searchInput" [content]="order.item.brand">{{ order.item.brand }}</p></td>
+                <td ><p appHighlight [searchInput]="searchInput" [content]="order.item.size">{{ order.item.size }}</p></td>
+                <td ><p appHighlight [searchInput]="searchInput" [content]="order.item.shortTitle" [title]="order.item.title" class="small">{{ order.item.shortTitle }}</p></td>
+                <td ><p appHighlight [searchInput]="searchInput" [content]="order.convertedPrice">{{ order.convertedPrice }}</p></td>
+                <td ><p appHighlight [searchInput]="searchInput" [content]="order.officeAddress" class="small">{{ order.officeAddress }}</p></td>
+                <td ><p appHighlight [searchInput]="searchInput" [content]="order.outputTimeInterval">{{ order.outputTimeInterval }}</p></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- страницы -->
+    <div class="text-end mt-1 mb-3" *ngIf="ordersPageParams.totalPages > 1 && ordersPageParams.totalCount > 10">
+        <a *ngFor="let in of helpersService.counter(ordersPageParams.totalPages); let i='index + 1';" [ngClass]="ordersPageParams.currentPage == i ? 'me-1 btn btn-primary btn-sm' : 'me-1 btn btn-outline-primary btn-sm'" (click)="changePage(i, true)" class="nowrap">{{ i }}</a>
+    </div>
+
+    <!-- таблица листов подбора и собранных заказов -->
+    <div *ngIf="ordersPageParams.viewType == 'inSupply'" >
+        <div *ngFor="let pickList of pickLists" class="card mt-5 mb-2">
+            <div class="fw-bold card-header">
+                <a target="_blank" class="me-5 text-decoration-none" [href]="'/workspace/print?pickListId=' + pickList.id">Лист подбора #{{ pickList.number }} <span class="text-secondary small">{{ pickList.date }}</span></a>
+                <a target="_blank" class="me-5 text-decoration-none" [href]="'/workspace/print?stickersQRByPickListId=' + pickList.id">Стикеры QR</a>
+                <a target="_blank" class="me-5 text-decoration-none" [href]="'/workspace/print?stickersByPickListId=' + pickList.id">Этикетки</a>
+            </div>
+            <div class="card-body">
+                <table *ngIf="pickList.orders.length > 0" class="table table-sm">
+                    <thead>
+                        <tr>
+                            <td>№ задания</td>
+                            <td>Фото</td>
+                            <td>Бренд</td>
+                            <td>Название</td>
+                            <td>Размер</td>
+                            <td>Артикул поставщика</td>
+                            <td>Этикетка</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let order of pickList.orders">
+                        <td>{{ order.orderId }}</td>
+                        <td><img *ngIf="order.item.photo" [src]="constants.SITE_NAME + 'cache/38-50-100/public/images/' + order.item.photo " /></td>
+                        <td>{{ order.item.brand }}</td>
+                        <td title="{{ order.item.title }}">{{ order.item.shortTitle }}</td>
+                        <td>{{ order.item.size }}</td>
+                        <td>{{ order.item.articul }}</td>
+                        <td><span class="me-5">{{ order.stickerPartA }}</span><span class="float-right">{{ order.stickerPartB }}</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+</div>

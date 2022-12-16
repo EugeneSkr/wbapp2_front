@@ -1,0 +1,50 @@
+<div class="container">
+    <!-- выбор месяца и года -->
+    <div class="my-3">
+        <select class="form-select w-auto d-inline-block me-2" name="currentMonth"  [(ngModel)]="currentMonth" (ngModelChange)="getTimeSheet()">
+            <option *ngFor="let month of monthes; let i='index + 1'" value="{{ i }}" [selected]="i==currentMonth">{{ month }}</option>
+        </select>
+        <select class="form-select w-auto d-inline-block" name="currentYear"  [(ngModel)]="currentYear" (ngModelChange)="getTimeSheet()">
+            <option *ngFor="let year of counterForYears();" value="{{ year }}" [selected]="year==currentYear">{{ year }}</option>
+        </select>
+        <img *ngIf="loadingService.isLoading$ | async" class="d-inline-block loader ms-2" src="{{ constants.SITE_NAME }}public/siteImages/spinner.gif"  />
+    </div>
+    <h5 class="text-danger">{{ helpersService.customError$ | async }}</h5>
+
+    <!-- календарь с количеством заказов по пользователям -->
+    <div *ngFor="let sheet of timeSheet;" class="my-5">
+        <p class="fw-bold">{{ sheet.fio }}</p>
+        <table class="align-top">
+            <tr>
+                <td class="w-50">
+                    <div class="calendar">
+                        <table class="table table-bordered text-center">
+                            <thead>
+                                <td>ПН</td>
+                                <td>ВТ</td>
+                                <td>СР</td>
+                                <td>ЧТ</td>
+                                <td>ПТ</td>
+                                <td>СБ</td>
+                                <td>ВС</td>
+                            </thead>
+                            <tbody id="calendarContainer" [innerHTML]="sheet.calendarStr">
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+                <td class="loader"></td>
+                <td class="align-top">
+                    <div class="calendar">
+                        <p class="mt-0 mb-2">Открыто поставок: {{ sheet.openedSupplies }}</p>
+                        <p class="mb-2">Закрыто поставок: {{ sheet.closedSupplies }}</p>
+                        <p class="mb-2">Всего оформлено заказов: <span class="fw-bold">{{ sheet.totalOrdersCount }}</span></p>
+                        <p class="mt-3 dayInfo" id="userDayInfo{{ sheet.id }}"></p>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+
+</div>

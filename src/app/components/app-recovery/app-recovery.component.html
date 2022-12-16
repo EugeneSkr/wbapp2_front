@@ -1,0 +1,59 @@
+<div class="container">
+    <h3 class="mb-3 text-primary">Wbapp</h3>
+    <h3 class="mb-3">Сброс пароля</h3>
+
+    <form class="mt-3" (ngSubmit)="checkRecovery()" #recoveryForm="ngForm" novalidate>
+        <div class="text-danger"><p>{{ helpersService.customError$ | async }}&nbsp;</p></div>
+        <!-- Форма с запросом адреса почты для отправки письма со ссылкой на сброс пароля -->
+        <div *ngIf="changePasswordStep === 0">
+            <div class="mb-3">
+                <label class="form-label">Электронная почта:</label>
+                <input type="email" class="form-control" autofocus  name="recoveryEmail" id="recoveryEmail" appEmailValidator #recoveryEmail="ngModel" [(ngModel)]="rEmail" required/>
+                <p class="text-danger" *ngIf="recoveryEmail.errors?.['required'] && (recoveryEmail.dirty || recoveryEmail.touched)">Укажите адрес электронной почты</p>
+                <p class="text-danger" *ngIf="recoveryEmail.errors?.['emailInvalid'] && (recoveryEmail.dirty || recoveryEmail.touched)">Укажите корректный адрес электронной почты</p>
+                </div>
+            <div class="mb-3 text-end">
+                <button type="submit" class="btn btn-primary" [disabled]="recoveryForm.invalid">Сбросить пароль</button>
+            </div>
+        </div>
+        <!-- отображение сообщения об отправке письма  -->
+        <div *ngIf="changePasswordStep === 1">
+            <div class="mb-3">
+                <div class="mb-3">
+                    <p class="text-success">На адрес {{ rEmail }} отправлено письмо со ссылкой, перейдя по которой, вы сможете сменить пароль.</p>
+                    <p class="text-success">Ссылка действует 1 час.</p>
+                </div>
+            </div>
+        </div>
+        <!-- форма смены пароля -->
+        <div *ngIf="changePasswordStep === 2">
+            <p class="text-primary">Смена пароля для <b>{{ recoveryData.userEmail }}</b></p>
+            <div class="form-row" ngModelGroup="passwords" #passwords="ngModelGroup" appCheckPassword>
+                <div class="mb-3">
+                    <label class="form-label">Новый пароль (от 6 символов):</label>
+                    <input type="password" class="form-control" name="regPassword" #regPassword="ngModel" [(ngModel)]="recoveryData.newpass" required minlength="6"/>
+                    <p class="text-danger" *ngIf="regPassword.invalid && (regPassword.dirty || regPassword.touched)">Введите пароль (длина от 6 символов)</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Повторите пароль:</label>
+                    <input type="password" class="form-control"   name="regPassword2" #regPassword2="ngModel"  [(ngModel)]="recoveryData.newpass2" required />
+                    <p class="text-danger" *ngIf="regPassword2.invalid && (regPassword2.dirty || regPassword2.touched)">Повторите пароль</p>
+                    <p class="text-danger" *ngIf="passwords.errors?.['passwordMismatch'] && (regPassword2.dirty || regPassword2.touched)">Пароли не сходятся</p>
+                </div>
+            </div>
+            <div class="mb-3 text-end">
+                <button type="submit" class="btn btn-primary" [disabled]="recoveryForm.invalid">Сменить пароль</button>
+            </div>
+        </div>
+        <div *ngIf="changePasswordStep === 3">
+            <div class="mb-3">
+                <p class="text-success">Пароль изменён!</p>
+                <p class="text-success">Выполните <a class="text-success" href="/login">вход в систему</a> c новым паролем</p>
+            </div>
+        </div>
+    </form>
+    <div class="mb-3 text-center">
+        <a href="/login" class="btn btn-link btn-sm">Войти</a>
+        <a href="/registration" class="btn btn-link btn-sm">Регистрация</a>
+    </div>
+</div>

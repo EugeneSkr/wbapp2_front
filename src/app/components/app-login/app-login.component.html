@@ -1,0 +1,27 @@
+<div class="container">
+    <h3 class="mb-3 text-primary">Wbapp</h3>
+    <h3 class="mb-3">Авторизация</h3>
+    <!-- форма ввода логина и пароля -->
+    <form (ngSubmit)="checkLogin()" #loginForm="ngForm" novalidate>
+        <div class="text-danger"><p>{{ helpersService.customError$ | async }}&nbsp;</p></div> 
+        <div class="mb-3">
+            <label class="form-label">Электронная почта:</label>
+            <input type="email" class="form-control" autofocus  name="loginEmail" id="loginEmail" appEmailValidator #loginEmail="ngModel" [(ngModel)]="email" required/>
+            <p class="text-danger" *ngIf="loginEmail.errors?.['required'] && (loginEmail.dirty || loginEmail.touched)">Укажите адрес электронной почты</p>
+            <p class="text-danger" *ngIf="loginEmail.errors?.['emailInvalid'] && (loginEmail.dirty || loginEmail.touched)">Укажите корректный адрес электронной почты</p>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Пароль:</label>
+            <input type="password" class="form-control" name="loginPassword" id="loginPassword" #loginPassword="ngModel" [(ngModel)]="password" required/>
+            <p class="text-danger" *ngIf="loginPassword.invalid && (loginPassword.dirty || loginPassword.touched)">Введите пароль</p>
+        </div>
+        <div class="mb-3 text-end">
+            <button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid">Войти</button>
+        </div>
+        <div class="mb-3 text-center">
+            <a href="/registration" class="btn btn-link btn-sm">Регистрация</a>
+            <a href="/recovery" class="btn btn-link btn-sm">Забыли пароль?</a>
+        </div>
+    </form>
+</div>
+

@@ -1,0 +1,22 @@
+@media print  {
+    h1 { page-break-before: always; }
+    .noprint{
+        display:none;
+    }
+}
+
+TABLE{
+    font-size:10px;
+}
+
+.svgContainer{
+    width:160px;
+    height: 80px;
+}
+
+.qrContainer{
+    height:165px;
+    width:260px;
+    margin:0;
+    padding:0px;
+}

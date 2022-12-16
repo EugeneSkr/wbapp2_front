@@ -1,0 +1,190 @@
+<div class="container">
+    <!-- добавление товара -->
+    <a *ngIf="!newItem && !editItemId" (click)="addNewItem()" class="btn btn-outline-primary mt-3">
+        <!-- plus -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+          </svg>
+          Добавить товар
+    </a>
+
+
+    <!-- поиск -->
+    <h5 class="mt-3 text-success" *ngIf="noticeMessage">{{ noticeMessage }}</h5>
+    <div *ngIf="!newItem && !editItemId" class="mt-3">
+        <div class="my-3">
+            <input class="form-control w-25 d-inline-block" [(ngModel)]="searchInput"  (ngModelChange)='searchInputChanged.next($event)' placeholder="Поиск" type="text" />
+            <img *ngIf="loadingService.isLoading$  | async" class="d-inline-block loader ms-2" src="{{ constants.SITE_NAME }}public/siteImages/spinner.gif"  />
+        </div>
+    </div>
+
+    <!-- добавление нового/редактирование товара -->
+    <div *ngIf="newItem || editItemId">
+        <h6 class="mt-3" *ngIf="newItem">Новый товар:</h6>
+        <h6 class="mt-3" *ngIf="editItemId">Редактирование товара #{{ editItemId }}:</h6>
+
+        <h5 class="mt-5 text-danger">{{ helpersService.customError$ | async }}</h5>
+        <div class="w-50">
+            <form (ngSubmit)="saveItem()" #editItemForm="ngForm" novalidate>
+                <div class="">
+                    <div class="mb-3">
+                        <label class="form-label">Фотография:</label>
+                        <p>
+                            <input class="form-control w-50 d-inline-block" type="file" (change)="onChange($event)" value="" id="iFile" #iFile />
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="imgContainer" *ngFor="let photo of currentItem.photoList">
+                            <a (click)="deleteImg(photo, 'current')" class="deleteImg" title="Удалить фото">
+                                <!-- X symbol -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                            </svg>
+                            </a>
+                            <a [href]="constants.SITE_NAME + 'public/images/' + photo" target="_blank" style="z-index:1;"><img [src]="constants.SITE_NAME  + 'public/images/' + photo" class="imgItem"/></a>
+                        </div>
+                        
+
+                        <div class="imgContainer" *ngFor="let photo of currentItem.newPhotoList">
+                            <a (click)="deleteImg(photo, 'new')" class="deleteImg" title="Удалить фото">
+                                <!-- X symbol-->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                            </svg>
+                            </a>
+                            <a [href]="constants.SITE_NAME + 'tmpfiles/' + photo" target="_blank" style="z-index:1;"><img [src]="constants.SITE_NAME + 'tmpfiles/' + photo" class="imgItem"/></a>
+                        </div>
+                    </div>
+                </div>
+
+                 
+                <div class="mb-3">
+                    <label class="form-label">Наименование: *</label>
+                    <input type="text" class="form-control" name="iTitle" [(ngModel)]="currentItem.title" #iTitle="ngModel" value="{{ currentItem.title }}" required />
+                    <p class="text-danger" *ngIf="iTitle.invalid && (iTitle.dirty || iTitle.touched)">Укажите наименование</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Артикул поставщика: *</label>
+                    <input type="text" class="form-control" name="iArticul" [(ngModel)]="currentItem.articul" #iArticul="ngModel" value="{{ currentItem.articul }}" required />
+                    <p class="text-danger" *ngIf="iArticul.invalid && (iArticul.dirty || iArticul.touched)">Укажите артикул</p>
+
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Артикул WB:</label>
+                    <input type="text" class="form-control" name="iArticulWB" [(ngModel)]="currentItem.articulWb" #iArticulWB="ngModel" value="{{ currentItem.articulWb }}"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Бренд: *</label>
+                    <input type="text" class="form-control" name="iBrand" [(ngModel)]="currentItem.brand" #iBrand="ngModel" value="{{ currentItem.brand }}" required />
+                    <p class="text-danger" *ngIf="iBrand.invalid && (iBrand.dirty || iBrand.touched)">Укажите бренд</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Тип:</label>
+                    <input type="text" class="form-control" placeholder="носки, трусы и т.п." name="iType" [(ngModel)]="currentItem.type" value="{{ currentItem.type }}"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Цвет:</label>
+                    <input type="text" class="form-control" name="iColor" [(ngModel)]="currentItem.color" value="{{ currentItem.color }}"/>
+                  </div>
+                <div class="mb-3">
+                    <label class="form-label">Размер: *</label>
+                    <input type="text" class="form-control" name="iSize" [(ngModel)]="currentItem.size" #iSize="ngModel" value="{{ currentItem.size }}" required />
+                    <p class="text-danger" *ngIf="iSize.invalid && (iSize.dirty || iSize.touched)">Укажите размер</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Штрихкод:</label>
+                    <input type="text" class="form-control" name="iBarcode" [(ngModel)]="currentItem.barcode" value="{{ currentItem.barcode }}"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">chrt_id:</label>
+                    <input type="text" class="form-control" name="iChrtId" [(ngModel)]="currentItem.chrtId" value="{{ currentItem.chrtId }}"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Цена розничная:</label>
+                    <input type="text" class="form-control" name="iCosts" [(ngModel)]="currentItem.costs" value="{{ currentItem.costs }}"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Этикетка. Размер:</label>
+                    <input type="text" class="form-control" name="istickerSize" [(ngModel)]="currentItem.stickerSize" value="{{ currentItem.stickerSize }}"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Этикетка. Состав:</label>
+                    <input type="text" class="form-control" name="istickerContains" [(ngModel)]="currentItem.stickerContains" value="{{ currentItem.stickerContains }}"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Этикетка. Страна:</label>
+                    <input type="text" class="form-control" name="istickerCountry" [(ngModel)]="currentItem.stickerCountry" value="{{ currentItem.stickerCountry }}"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Этикетка. Производитель:</label>
+                    <input type="text" class="form-control" name="istickerManufacturer" [(ngModel)]="currentItem.stickerManufacturer" value="{{ currentItem.stickerManufacturer }}"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Этикетка. Адрес производителя:</label>
+                    <input type="text" class="form-control" name="istickerAddress" [(ngModel)]="currentItem.stickerAddress" value="{{ currentItem.stickerAddress }}"/>
+                </div>
+                <div class="mb-3 text-end">
+                    <button type="button" class="float-start me-2 btn btn-outline-danger" (click)="deleteItem(editItemId)" *ngIf="editItemId">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="18" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                    </svg> Удалить</button>
+                    <button type="button" class="float-start btn btn-outline-primary" (click)="cancel()">Отмена</button>
+                    <button type="submit" class="btn btn-primary" [disabled]="editItemForm.invalid">Сохранить</button>
+                </div>
+            
+            </form>
+        </div>
+
+    </div>
+
+    <!-- список товаров -->
+    <div *ngIf="!newItem && !editItemId && items.length > 0" class="mt-3">
+        <h6 class="">Список товаров:</h6>
+        <div class="text-end" *ngIf="itemsPageParams.totalPages > 1">
+            <a *ngFor="let in of helpersService.counter(itemsPageParams.totalPages); let i='index + 1';" [ngClass]="itemsPageParams.currentPage == i ? 'me-1 btn btn-primary btn-sm' : 'me-1 btn btn-outline-primary btn-sm'" (click)="changePage(i)" class="nowrap">{{ i }}</a>
+        </div>
+        <table class="table table-hover table-sm mt-3">
+            <thead>
+                <tr class="text-start">
+                    <th *ngFor="let field of tableFields" [width]="field.width + '%'" >
+                        <a (click)="changeSort(field.sort)" class="nowrap text-decoration-none fw-normal">{{ field.title }}
+                            <span *ngIf="field.active && field.order == 'ASC'">
+                                <!-- arrow-down -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-short" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M8 4a.5.5 0 0 1 .5.5v5.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L7.5 10.293V4.5A.5.5 0 0 1 8 4z"/>
+                                </svg>
+                            </span>
+                            <span *ngIf="field.active && field.order == 'DESC'">
+                                <!-- arrow-up -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-short" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M8 12a.5.5 0 0 0 .5-.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5a.5.5 0 0 0 .5.5z"/>
+                                </svg>
+                            </span>
+                        </a>
+                    </th>                  
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of items" role="button" (click)="editItem(item.id)">
+                    <th scope="row"><img *ngIf="item.photo" [src]="constants.SITE_NAME + 'cache/38-50-100/public/images/' + item.photo" class="imgItemSm" /></th>
+                    <td ><p appHighlight [searchInput]="searchInput" [content]="item.type">{{ item.type }}</p></td>
+                    <td ><p appHighlight [searchInput]="searchInput" [content]="item.articul">{{ item.articul }}</p></td>
+                    <td ><p appHighlight [searchInput]="searchInput" [content]="item.brand">{{ item.brand }}</p></td>
+                    <td ><p appHighlight [searchInput]="searchInput" [content]="item.size">{{ item.size }}</p></td>
+                    <td ><p appHighlight [searchInput]="searchInput" [content]="item.shortTitle" [title]="item.title">{{ item.shortTitle }}</p></td>
+                    <td ><p appHighlight [searchInput]="searchInput" [content]="item.articulWb">{{ item.articulWb }}</p></td>
+                    <td ><p appHighlight [searchInput]="searchInput" [content]="item.chrtId.toString()">{{ item.chrtId }}</p></td>
+                    <td ><p appHighlight [searchInput]="searchInput" [content]="item.barcode">{{ item.barcode }}</p></td>
+                    <td ><p appHighlight [searchInput]="searchInput" [content]="item.costs.toString()">{{ item.costs }}</p></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="text-end mb-3" *ngIf="itemsPageParams.totalPages > 1">
+            <a *ngFor="let in of helpersService.counter(itemsPageParams.totalPages); let i='index + 1';" [ngClass]="itemsPageParams.currentPage == i ? 'me-1 btn btn-primary btn-sm' : 'me-1 btn btn-outline-primary btn-sm'" (click)="changePage(i, 'bottom')" class="nowrap">{{ i }}</a>
+        </div>
+
+    </div>
+</div>

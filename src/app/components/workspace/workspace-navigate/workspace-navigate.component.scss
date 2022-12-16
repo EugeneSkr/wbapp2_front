@@ -1,0 +1,15 @@
+.navi{
+    background-color: #d7e9fb;
+}
+
+.btnActive{
+    background-color: #0d6efd;
+    color:#fff;
+}
+
+@media print  {
+    h1 { page-break-before: always; }
+    .noprint{
+        display:none;
+    }
+}

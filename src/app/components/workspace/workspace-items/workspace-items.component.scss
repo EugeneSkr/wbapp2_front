@@ -1,0 +1,38 @@
+.imgContainer{
+    position: relative;
+    display:inline-block;
+    width:auto;
+    height:100px;
+    margin:10px 20px 10px 0;
+}
+
+.imgItem{
+    height:100px;
+}
+
+.imgItemSm{
+    height: 50px;
+}
+
+.deleteImg{
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    top: -12px;
+    right:-7px;
+    z-index:10000;
+    cursor: pointer;
+}
+
+.nowrap{
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.highlight{
+    background-color: yellow;
+}
+
+.loader{
+    width:40px;
+}
