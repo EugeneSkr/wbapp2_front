@@ -40,5 +40,5 @@
 Описание интерфейсов для заказов, пользователей и товаров.
 
 ## Backend
-<a href="https://github.com/EugeneSkr/wbapp2_back" target="_blank">Бэкенд</a> приложения на PHP 7.7
+<a href="https://github.com/EugeneSkr/wbapp2_back" target="_blank">Бэкенд</a> приложения на PHP7.4
 
